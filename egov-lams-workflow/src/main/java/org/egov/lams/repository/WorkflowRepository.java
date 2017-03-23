@@ -70,7 +70,6 @@ public class WorkflowRepository {
 		}
 		
 		ObjectMapper objectMapper = new ObjectMapper();
-		//objectMapper.registerModules(new JSR310Module());
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		ProcessInstance processInstance2 = null;
 		try {
@@ -120,14 +119,30 @@ public class WorkflowRepository {
 					+ "/"+agreement.getStateId()
 					+ propertiesManager.getWorkflowServiceUpdatePath();
 
-		TaskResponse taskResponse = null;
+		String taskResponse = null;
 		try {
-			taskResponse = restTemplate.postForObject(url, taskRequest, TaskResponse.class);
+			taskResponse = restTemplate.postForObject(url, taskRequest, String.class);
 		} catch (Exception e) {
 			LOGGER.info(e.toString());
 			e.printStackTrace();
 		}
-		return taskResponse;
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		TaskResponse taskResponseObject = null;
+		try {
+			taskResponseObject = objectMapper.readValue(taskResponse, TaskResponse.class);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return taskResponseObject;
 	}
 
 	public void saveAgreement(AgreementRequest agreementRequest) {
